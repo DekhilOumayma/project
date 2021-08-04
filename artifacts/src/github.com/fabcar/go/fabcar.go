@@ -48,32 +48,6 @@ func (s *SmartContract) Init(stub shim.ChaincodeStubInterface) sc.Response {
 	return shim.Success(nil)
 }
 
-// func (s *SmartContract) initLedger(ctx contractapi.TransactionContextInterface) error {
-// 	patient := []Patient{
-// 		Patient{
-// 			FirstName: "oumayma",
-// 			LastName:  "dekhil",
-// 			ID:        "01",
-// 		},
-// 		Patient{
-// 			FirstName: "ameni",
-// 			LastName:  "dekhil",
-// 			ID:        "02",
-// 		},
-// 	}
-
-// 	for i, patient := range patient {
-// 		patientAsBytes, _ := json.Marshal(patient)
-// 		err := ctx.GetStub().PutState("PATIENT"+strconv.Itoa(i), patientAsBytes)
-
-// 		if err != nil {
-// 			return fmt.Errorf("Failed to put to world state. %s", err.Error())
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 // Invoke is called as a result of an application request to run the chaincode.
 func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) sc.Response {
 	fcn, params := stub.GetFunctionAndParameters()
@@ -85,9 +59,9 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) sc.Response {
 		result, err = s.GetPatient(stub, params)
 	} else if fcn == "GetAllPatients" {
 		result, err = s.GetAllPatients(stub)
-		// } else if fcn == "AddRecordToPatient" {
-		// 	result, err = s.AddRecordToPatient(stub, params)
 	}
+	// } else if fcn == "AddRecordToPatient" {
+	// 	result, err = s.AddRecordToPatient(stub, params)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -95,67 +69,42 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) sc.Response {
 }
 
 func (s *SmartContract) CreatePatient(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	fmt.Println("Create Patient executed")
+
 	if len(args) != 3 {
 		return nil, fmt.Errorf("failed to create Patient: The number of arguments is incorrect")
+
 	}
 
 	//Create new Patient
+	fmt.Printf("args: %s", args[2])
 
-	var newPatient = Patient{FirstName: args[1], LastName: args[2], ID: args[3]}
-	// var newPatient = Patient{FirstName: args[1], LastName: args[2], ID: args[3], Records: []Record{}}
+	var newPatient = Patient{FirstName: args[0], LastName: args[1], ID: args[2]}
 
 	newPatientAsBytes, err := json.Marshal(newPatient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Patient")
 	}
 
-	stub.PutState(args[3], newPatientAsBytes)
+	stub.PutState(args[2], newPatientAsBytes)
 	return newPatientAsBytes, nil
 }
 
-////////////////////////////////
-////////////////////////////////
-////////////////////////////////
-// func (s *SmartContract) AddRecordToPatient(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-// 	if len(args) != 3 {
-// 		return nil, fmt.Errorf("failed to add Record: The number of arguments is incorrect")
-// 	}
-
-// 	//Create the record
-// 	var newRecord = Record{Information: args[1], ID: args[3]}
-
-// 	existingPatientAsBytes, err := stub.GetState(args[3])
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to add Record: Could not get the patient")
-// 	}
-
-// 	existingPatient := Patient{}
-// 	json.Unmarshal(existingPatientAsBytes, &existingPatient)
-// 	existingPatient.Records = append(existingPatient.Records, newRecord)
-
-// 	existingPatientAsBytes, err = json.Marshal(existingPatient)
-
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to add Record")
-// 	}
-
-// 	stub.PutState(args[0], existingPatientAsBytes)
-// 	return existingPatientAsBytes, nil
-// }
-
 func (s *SmartContract) GetPatient(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 1 {
+	if len(args) != 3 {
 		return nil, fmt.Errorf("failed to get Patient: The number of arguments is incorrect")
+
 	}
 
-	patientAsBytes, err := stub.GetState(args[3])
+	patientAsBytes, err := stub.GetState(args[2])
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get Patient %s", args[3])
+		return nil, fmt.Errorf("failed to get Patient %s", args[2])
 	}
 
 	if patientAsBytes == nil {
-		return nil, fmt.Errorf("failed to get Patient %s: It doet not exists", args[3])
+		return nil, fmt.Errorf("failed to get Patient %s: It doet not exists", args[2])
 	}
 
 	return patientAsBytes, nil
@@ -206,3 +155,7 @@ func main() {
 		fmt.Printf("Error creating new Smart Contract: %s", err)
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
